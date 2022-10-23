@@ -23,7 +23,6 @@ export default class Game extends Selector {
 
         this.wins = 0;
         this.losses = 0;
-        this.turns = 0;
 
         this.currentStep = 0;
         this.lastStep = 3;
@@ -88,7 +87,6 @@ export default class Game extends Selector {
 
     checkState() {
         if (this.currentStep === this.lastStep || this.word.catched === true) {
-            this.turns++;
             this.renderEndGame();
             this.reset()
         }
@@ -114,15 +112,22 @@ export default class Game extends Selector {
             this.changeTextById(LETTERS_WRAPPER_ID, EMPTY_TEXT);
             this.currentStep = 0;
 
-            this.generateWord();
-            this.updateWordProperties();
-            this.getElement(LETTERS_WRAPPER_ID).style.textAlign = LETTERS_START_STYLE;
+            let isGame = confirm('\nПродолжить ИГРУ?\n');
 
-            this.word = new Word(this.text);
+            if (!isGame) {
+                alert(`ИГРА ЗАВЕРШЕНА!\n === Выигрышей ${this.wins}.\n === Проигрышей ${this.losses}.`);
+            } else {
 
-            this.getElmentsByCSS(IMG_CLASS).forEach(item => item.style.opacity = STEP_OPACITY_STYLE);
-            this.start();
-        }, 3000)
+                this.generateWord();
+                this.updateWordProperties();
+                this.getElement(LETTERS_WRAPPER_ID).style.textAlign = LETTERS_START_STYLE;
+
+                this.word = new Word(this.text);
+
+                this.getElmentsByCSS(IMG_CLASS).forEach(item => item.style.opacity = STEP_OPACITY_STYLE);
+                this.start();
+            }
+        }, 1000);
     }
 
     start() {
