@@ -1,12 +1,20 @@
 import WordField from "./word-field.js";
 import Word from "./word.js";
 import Selector from "./selector.js";
-import EndGame from "./end-game.js";
 import {
     LETTERS_WRAPPER_ID,
     WORD_WRAPPER_ID,
     IMG_CLASS,
+    WINS_COUNTER,
+    LOSSES_COUNTER,
     LOST_STEP_OPACITY_STYLE,
+    STEP_OPACITY_STYLE,
+    LETTERS_START_STYLE,
+    LETTERS_RESULT_STYLE,
+    RESULT_STATMENT_FONT_SIZE_STYLE,
+    WIN_TEXT,
+    LOSE_TEXT,
+    EMPTY_TEXT
 } from "./statements.js";
 
 export default class Game extends Selector {
@@ -15,6 +23,7 @@ export default class Game extends Selector {
 
         this.wins = 0;
         this.losses = 0;
+        this.turns = 0;
 
         this.currentStep = 0;
         this.lastStep = 3;
@@ -28,7 +37,6 @@ export default class Game extends Selector {
         this.updateWordProperties();
 
         this.word = new Word(this.text);
-        this.endGame = new EndGame();
     }
 
     generateWord() {
@@ -63,6 +71,29 @@ export default class Game extends Selector {
         this.changeTextById(WORD_WRAPPER_ID, content)
     }
 
+    updateStats() {
+        this.changeTextByCSS(WINS_COUNTER, this.wins)
+        this.changeTextByCSS(LOSSES_COUNTER, this.losses)
+    }
+
+    renderEndGame() {
+        this.changeTextById(LETTERS_WRAPPER_ID, EMPTY_TEXT);
+        this.getElement(LETTERS_WRAPPER_ID).style.textAlign = LETTERS_RESULT_STYLE;
+        this.getElement(LETTERS_WRAPPER_ID).style.fontSize = RESULT_STATMENT_FONT_SIZE_STYLE;
+        this.currentStep === this.lastStep ?
+            (this.changeTextById(LETTERS_WRAPPER_ID, LOSE_TEXT), this.losses++) :
+            (this.changeTextById(LETTERS_WRAPPER_ID, WIN_TEXT), this.wins++);
+        this.updateStats();
+    }
+
+    checkState() {
+        if (this.currentStep === this.lastStep || this.word.catched === true) {
+            this.turns++;
+            this.renderEndGame();
+            this.reset()
+        }
+    }
+
     loseStep() {
         this.getElmentsByCSS(IMG_CLASS)[this.currentStep].style.opacity = LOST_STEP_OPACITY_STYLE;
     }
@@ -75,7 +106,23 @@ export default class Game extends Selector {
             this.currentStep++;
             this.loseStep();
         }
-        this.endGame.checkState();
+        this.checkState();
+    }
+
+    reset() {
+        setTimeout(() => {
+            this.changeTextById(LETTERS_WRAPPER_ID, EMPTY_TEXT);
+            this.currentStep = 0;
+
+            this.generateWord();
+            this.updateWordProperties();
+            this.getElement(LETTERS_WRAPPER_ID).style.textAlign = LETTERS_START_STYLE;
+
+            this.word = new Word(this.text);
+
+            this.getElmentsByCSS(IMG_CLASS).forEach(item => item.style.opacity = STEP_OPACITY_STYLE);
+            this.start();
+        }, 3000)
     }
 
     start() {
