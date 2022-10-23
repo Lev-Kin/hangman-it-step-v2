@@ -1,20 +1,12 @@
 import WordField from "./word-field.js";
 import Word from "./word.js";
 import Selector from "./selector.js";
+import EndGame from "./end-game.js";
 import {
     LETTERS_WRAPPER_ID,
     WORD_WRAPPER_ID,
     IMG_CLASS,
-    WINS_COUNTER,
-    LOSSES_COUNTER,
     LOST_STEP_OPACITY_STYLE,
-    STEP_OPACITY_STYLE,
-    LETTERS_START_STYLE,
-    LETTERS_RESULT_STYLE,
-    RESULT_STATMENT_FONT_SIZE_STYLE,
-    WIN_TEXT,
-    LOSE_TEXT,
-    EMPTY_TEXT
 } from "./statements.js";
 
 export default class Game extends Selector {
@@ -23,10 +15,9 @@ export default class Game extends Selector {
 
         this.wins = 0;
         this.losses = 0;
-        this.turns = 0;
 
         this.currentStep = 0;
-        this.lastStep = 4;
+        this.lastStep = 3;
 
         this.wordField = new WordField();
         this.lengthOfWords = this.wordField.words.length;
@@ -37,14 +28,15 @@ export default class Game extends Selector {
         this.updateWordProperties();
 
         this.word = new Word(this.text);
+        this.endGame = new EndGame();
     }
 
     generateWord() {
         let unique = false;
         while (!unique) {
-            let numb = Math.floor(Math.random() * this.wordField.words.length);
-            if (this.uniqueWords.indexOf(numb) === -1) {
-                this.indexOfWord = numb;
+            let num = Math.floor(Math.random() * this.wordField.words.length);
+            if (this.uniqueWords.indexOf(num) === -1) {
+                this.indexOfWord = num;
                 this.uniqueWords.push(this.indexOfWord);
                 unique = true;
             }
@@ -53,17 +45,6 @@ export default class Game extends Selector {
 
     updateWordProperties() {
         this.text = this.wordField.words[this.indexOfWord].text;
-    }
-
-    guess(e, letter) {
-        e.target.disabled = true;
-        if (this.word.guess(letter)) {
-            this.drawWord();
-        } else {
-            this.currentStep++;
-           // this.loseStep();
-        }
-        //this.checkState();
     }
 
     drawLetters() {
@@ -82,8 +63,23 @@ export default class Game extends Selector {
         this.changeTextById(WORD_WRAPPER_ID, content)
     }
 
+    loseStep() {
+        this.getElmentsByCSS(IMG_CLASS)[this.currentStep].style.opacity = LOST_STEP_OPACITY_STYLE;
+    }
+
+    guess(e, letter) {
+        e.target.disabled = true;
+        if (this.word.guess(letter)) {
+            this.drawWord();
+        } else {
+            this.currentStep++;
+            this.loseStep();
+        }
+        this.endGame.checkState();
+    }
+
     start() {
-        console.log("draw")
+        this.loseStep();
         this.drawLetters();
         this.drawWord();
     }
